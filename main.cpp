@@ -114,7 +114,7 @@ struct edge
 {
     ll w;
     int u;
-    edge(int u, ll w) : u(u), w(w) {}
+    edge(int u, ll w) { this->u = u; this->w = w; }
 };
 
 vector <ll> dist;
@@ -129,6 +129,19 @@ void dfs(int v)
         if (!used[to.u])
         {
             dfs(to.u);
+        }
+    }
+}
+
+void dfs_mx(int v) /// finds the maximum path in graph without visiting a single vertex twice
+{
+    used[v] = 1;
+    for (auto to : gr[v])
+    {
+        if (!used[to.u])
+        {
+            dist[to.u] = dist[v] + to.w;
+            dfs_mx(to.u);
         }
     }
 }
@@ -244,24 +257,133 @@ ll gcd(ll a, ll b)
     return (a + b);
 }
 
+typedef complex <double> cd;
+
+vector <cd> fft(vector <cd> &ar)
+{
+    int n = (int)ar.size();
+    if (n == 1)
+        return vector <cd> (1, ar[0]);
+    vector <cd> w(n, 1);
+    for (int i = 1; i < n; ++i)
+    {
+        double a = 2.0 * PI * i / (double)n;
+        w[i] = cd(cos(a), sin(a));
+    }
+    vector <cd> a(n >> 1), b(n >> 1);
+    for (int i = 0; i < (n >> 1); ++i)
+    {
+        a[i] = ar[2 * i];
+        b[i] = ar[2 * i + 1];
+    }
+    vector <cd> res(n);
+    a = fft(a), b = fft(b);
+    for (int i = 0; i < n; ++i)
+    {
+        res[i] = a[i % (n / 2)] + w[i] * b[i % (n / 2)];
+    }
+    return res;
+}
+
+//vector <cd> fft(vector <cd> &v)
+//{
+//    int n = v.size(), k = 1;
+//    while ((1 << (k * 1LL)) < n * 1LL)
+//        ++k;
+//    int high = -1;
+//    vector <int> rev(n);
+//    for (int i = 1; i < n; ++i)
+//    {
+//        high += (!(i & (i - 1)));
+//        rev[i] = rev[i ^ (1 << high)];
+//        rev[i] |= (1 << (k - high - 1));
+//    }
+//    vector <cd> w(n);
+//    for (int i = 0; i < n; ++i)
+//    {
+//        double a = 2.0 * PI * i / n;
+//        w[i] = cd(cos(a), sin(a));
+//    }
+//    vector <cd> cur(n);
+//    for (int i = 0; i < n; ++i)
+//    {
+//        cur[i] = v[rev[i]];
+//    }
+//    for (int len = 1; len < n; len <<= 1)
+//    {
+//        vector <cd> now(n);
+//        int st = w.size() / (2 * len);
+//        for (int beg = 0; beg < n;)
+//        {
+//            int h = beg;
+//            for (int i = 0; i < len; ++i)
+//            {
+//                cd val = w[i * st] * cur[h + len];
+//                now[beg] = cur[h] + val;
+//                now[beg + len] = cur[h] - val;
+//                ++beg, ++h;
+//            }
+//            beg += len;
+//        }
+//        cur.swap(now);
+//    }
+//    return cur;
+//}
+
+vector <cd> fft_rev(vector <cd> &as)
+{
+    vector <cd> res = fft(as);
+    for (int i = 0; i < (int)res.size(); i++)
+        res[i] /= as.size();
+    reverse(res.begin() + 1, res.end());
+    return res;
+}
+
 int main()
 {
     ios_base::sync_with_stdio(false);
 //    ifstream cin("input.txt");
 //    ofstream cout("output.txt");
-    int n, m;
-    cin >> n >> m;
-    gr.resize(n); dist.resize(n);
-    while (m--)
+    int n;
+    cin >> n;
+    vector <cd> a(n), b(n);
+    for (int i = 0; i < n; ++i)
     {
-        ll w;
-        int v, u;
-        cin >> v >> u >> w;
-        --v; --u;
-        gr[v].push_back(edge(u, w));
-        gr[u].push_back(edge(v, w));
+        int c;
+        cin >> c;
+        a[i] = c;
     }
-    dijkstra(1);
-    for (auto i : dist)
-        cout << i << " ";
+    for (int i = 0; i < n; ++i)
+    {
+        int c;
+        cin >> c;
+        b[i] = c;
+    }
+    while (n & (n - 1))
+    {
+        a.push_back(0);
+        b.push_back(0);
+        ++n;
+    }
+    cout << n << endl;
+    int g = n;
+    while (g--)
+    {
+        a.push_back(0);
+        b.push_back(0);
+        ++n;
+    }
+    a = fft(a), b = fft(b);
+    vector <cd> res(n);
+    for (int i = 0; i < n; ++i)
+    {
+        res[i] = a[i] * b[i];
+    }
+    res = fft_rev(res);
+    for (int i = 0; i < n; ++i)
+    {
+        if (res[i].real() < 0.0001)
+            continue;
+        cout << res[i].real() << " ";
+    }
 }
