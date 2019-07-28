@@ -170,39 +170,6 @@ void dijkstra(int s)
     }
 }
 
-struct st
-{
-    ll w;
-    int v, u;
-    st(int v, int u, ll w) : v(v), u(u), w(w) {}
-};
-
-int n, m;
-
-vector <st> gr1;
-
-vector <ll> d(int s)
-{
-    int tf = 0;
-    vector <ll> dist(n, inf);
-    dist[--s] = 0;
-    for (int i = 0; i < n; ++i)
-    {
-        tf = 0;
-        for (int j = 0; j < gr1.size(); ++j)
-        {
-            if (dist[gr1[j].v] > dist[gr1[j].u] + gr1[j].w)
-            {
-                dist[gr1[j].v] = dist[gr1[j].u] + gr1[j].w;
-                tf = 1;
-            }
-        }
-        if (!tf)
-            break;
-    }
-    return dist;
-}
-
 vector <int> prefix_function(string &s)
 {
     int n = s.size();
@@ -413,10 +380,8 @@ int main()
         res[i] = a[i] * b[i];
     }
     res = fft_rev(res);
-    for (int i = 0; i < n; ++i)
+    for (int i = 0; i < res.size(); ++i)
     {
-        if (res[i].real() < 0.0001)
-            continue;
         cout << res[i].real() << " ";
     }
 }
