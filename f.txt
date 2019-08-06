@@ -68,12 +68,12 @@ tree * upd1(tree *v, int vl, int vr, int l, int r, ll x)
 {
     push(v, vl, vr);
     if (l > r)
-        return new tree(v->l, v->r);
+        return v;
     else if (vl == l && vr == r)
     {
         v->add += x;
         push(v, vl, vr);
-        return new tree(v->l, v->r);
+        return v;
     }
     int m = (vl + vr) >> 1;
     return new tree(
