@@ -1,0 +1,22 @@
+@echo off
+
+g++ -O2 -std=c++14 solution.cpp -o solution.exe /// solution.cpp is smart (probably wrong) solution, which will b tested
+g++ -O2 -std=c++14 brut.cpp -o brut.exe /// brut.cpp is the brute force approach for our task
+g++ -O2 -std=c++14 gen.cpp -o gen.exe /// generator for tests
+
+set i=0
+
+:loop
+  gen.exe %i% > in
+  solution.exe < in > out
+  brut.exe < in > out-stupid
+
+  fc out out-stupid	
+  if errorlevel 1 goto fail
+
+  echo OK
+  set /a i=%i% + 1
+  goto loop
+
+:fail
+  echo Found incorrect
