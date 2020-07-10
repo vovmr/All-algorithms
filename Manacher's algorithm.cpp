@@ -24,7 +24,7 @@ void solve() {
 		while (i - k - 1 >= 0 && i + k < n && s[i - k - 1] == s[i + k]) ++k;
 
 		d[i] = k--;
-		if (i + k > r) l = i - k + 1, r = i + k;
+		if (i + k > r) l = i - k - 1, r = i + k;
 	}
 	for (auto i : d) cout << i << " ";
 	cout << '\n';
