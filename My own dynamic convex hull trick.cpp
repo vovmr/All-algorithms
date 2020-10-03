@@ -37,103 +37,59 @@ sim dor(const c&) { ris; }
 };
 #define imie(...) " [" << #__VA_ARGS__ ": " << (__VA_ARGS__) << "] "
 
-struct hull {
-
+struct cht {
 	struct line {
-		bool q;
-		ld k, b, x, val;
-		line(ld k = 0, ld b = 0) : x(-inf), q(0), k(k), b(b), val(0) {}
+		ld k, b, x, q;
+		line() : x(-inf), k(0), b(0), q(0) {}
+		line(ld k, ld b) : x(-inf), k(k), b(b), q(0) {}
 
-		inline bool parallel(const line &a) const { return (k == a.k); }
-		inline ld inter(const line &a) const {
-			if (parallel(a)) return inf;
-			return (ld)((b - a.b) / (a.k - k));
-		}
-		inline ld eval(ld X) const { return (k * X + b); }
+		inline ld eval(ld X) const { return k * X + b; }
+		inline bool parallel(const line &cur) const { return k == cur.k; }
+		inline ld isec(line cur) const { return (parallel(cur) ? inf : ((b - cur.b) / (cur.k - k))); }
 		inline bool operator < (const line &a) const {
-			if (a.q) return (x < a.val);
-			else return (k < a.k);
+			if (a.q) return x < a.x;
+			else return k < a.k;
 		}
 	};
 
 	set <line> st;
 	typedef set <line>::iterator iter;
 
-	inline bool hprev(iter &x) { return (x != st.begin()); }
-	inline bool hnext(iter &x) { return (x != st.end() && next(x) != st.end()); }
-	inline bool bad(const line &a, const line &b, const line &c) { return (a.inter(b) >= b.inter(c)); }
-
+	inline bool hp(iter x) { return x != st.begin(); }
+	inline bool hn(iter x) { return (x != st.end() && next(x) != st.end()); }
+	inline bool bad(const line &a, const line &b, const line &c) { return (a.isec(b) >= b.isec(c)); }
 	inline bool bad(iter x) {
-		if (!hprev(x) || !hnext(x)) return 0;
+		if (!hp(x) || !hn(x)) return 0;
 		return bad(*prev(x), *x, *next(x));
 	}
 
-	iter update(iter x) {
-		if (!hprev(x)) return x;
-		line temp = *x; temp.x = x->inter(*prev(x));
-		x = st.erase(x); return st.insert(x, temp);
+	inline iter update(iter x) {
+		if (!hp(x)) return x;
+		line f = *x; f.x = x->isec(*prev(x));
+		x = st.erase(x); return (st.insert(x, f));
 	}
-	void add_line(ld k, ld b) {
-		line cur(k, b);
-		auto it = st.lower_bound(cur);
+	inline void add(ld k, ld b) {
+		line cur(k, b); auto it = st.lower_bound(cur);
 		if (it != st.end() && cur.parallel(*it)) {
 			if (cur.b > it->b) it = st.erase(it);
 			else return;
 		}
 		it = st.insert(it, cur);
 		if (bad(it)) return (void)(st.erase(it));
-		while (hprev(it) && bad(prev(it))) st.erase(prev(it));
-		while (hnext(it) && bad(next(it))) st.erase(next(it));
+		while (hp(it) && bad(prev(it))) st.erase(prev(it));
+		while (hn(it) && bad(next(it))) st.erase(next(it));
 		it = update(it);
-		if (hprev(it)) update(prev(it));
-		if (hnext(it)) update(next(it));
+		if (hp(it)) update(prev(it));
+		if (hn(it)) update(next(it));
 	}
-	inline ld eval(ld f) {
-		line cur(0, 0); cur.q = 1; cur.val = f;
-		auto x = *--st.lower_bound(line(cur));
-		return x.eval(f);
+	inline ld eval(ld x) {
+		line cur; cur.x = x; cur.q = 1;
+		auto it = *--st.lower_bound(cur);
+		return it.eval(x);
 	}
 };
 
-vector <hull> ar;
-vector <ll> ans, a, b;
-vector < vector <int> > gr;
-
-void dfs(int v, int p = -1) {
-	int mx = -1;
-	for (auto to : gr[v]) if (to != p) {
-		dfs(to, v);
-		if (mx == -1 || ar[to].st.size() > ar[mx].st.size()) mx = to;
-	}
-	if (mx != -1) swap(ar[v], ar[mx]);
-	for (auto to : gr[v]) if (to != p && to != mx) {
-		for (auto x : ar[to].st) ar[v].add_line(x.k, x.b);
-	}
-	ans[v] = (mx == -1 ? 0 : -ar[v].eval(a[v]));
-	
-//	cout << "Convex hull of vertex " << v + 1 << " is: " << ans[v] << '\n';
-//	for (auto x : ar[v].st) cout << x.k << " * x + " << x.b << '\n';
-//	cout << '\n';
-
-	ar[v].add_line(-b[v], -ans[v]);
-}
-
 void solve() {
-	int n;
-	cin >> n;
-	a.resize(n); b.resize(n);
-	gr.resize(n); ar.resize(n); ans.resize(n);
-
-	for (auto &i : a) cin >> i;
-	for (auto &i : b) cin >> i;
-
-	for (int i = 1; i < n; ++i) {
-		int v, u;
-		cin >> v >> u; --v; --u;
-		gr[v].push_back(u); gr[u].push_back(v);
-	}
-	dfs(0);
-	for (auto i : ans) cout << i << " ";
 }
 
 int main() {
