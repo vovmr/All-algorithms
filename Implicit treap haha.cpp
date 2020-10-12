@@ -1,9 +1,6 @@
 #include <bits/stdc++.h>
 #include <ext/pb_ds/assoc_container.hpp>
 #include <ext/pb_ds/tree_policy.hpp>
-
-#pragma GCC optimize("Ofast")
-#pragma GCC target("avx,avx2,fma")
 #define fi first
 #define se second
 #define ll long long
@@ -63,10 +60,8 @@ inline int bp(int a, int n) {
 	return res;
 }
 
-inline int inv(int a) { return bp(a, mod - 2); }
-
 mt19937_64 rnd(chrono::steady_clock::now().time_since_epoch().count());
-ll gen(ll l, ll r) { return (l + (rnd() % (r - l + 1))); }
+inline int gen(int l, int r) { return (l + (rnd() % (r - l + 1))); }
 
 struct pnode {
 	int s = 1, val = 0, p = 0, sz = 0;
@@ -80,7 +75,7 @@ inline int sz(node t) { return (t ? t->sz : 0); }
 inline int s(node t) { return (t ? t->s : 1); }
 inline bool ex(node t) { return t != nullptr; }
 
-void upd(node t) {
+inline void upd(node t) {
 	if (t == nullptr) return;
 	t->sz = sz(t->l) + sz(t->r) + 1;
 	t->s = mult(mult(s(t->l), s(t->r)), t->val);
@@ -128,13 +123,6 @@ int get(node root, int l, int r) {
 	root = merge(merge(a, c), d); return res;
 }
 
-void print(node t) {
-	if (ex(t->l)) print(t->l);
-	if (ex(t)) cout << t->val << " ";
-	else return;
-	if (ex(t->r)) print(t->r);
-}
-
 void solve() {
 	int n;
 	cin >> n;
@@ -153,7 +141,6 @@ void solve() {
 			root = erase(root, f - 1);
 			int x = *pos.find_by_order(f - 1);
 			pos.erase(pos.lower_bound(x - 1));
-
 		}
 		else {
 			int l, r;
